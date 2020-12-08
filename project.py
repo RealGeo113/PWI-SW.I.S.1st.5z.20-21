@@ -61,3 +61,22 @@ def negative(source):
             image.putpixel((i, j), (red, green, blue))
 
     return image
+
+
+def binarization(source, edge):
+
+    image = Image.open(source)
+    for i in range(0, image.size[0] - 1):
+        for j in range(0, image.size[1] - 1):
+
+            pixelcolor = image.getpixel((i, j))
+            avgpixel=sum(pixelcolor)/3
+
+            if avgpixel > edge:
+                pixel = 0
+            else:
+                pixel = 255
+
+            image.putpixel((i, j), (pixel, pixel, pixel))
+
+    return image
