@@ -42,3 +42,22 @@ def lumi(source, ratio):
             image.putpixel((i, j), (newpixel[0], newpixel[1], newpixel[2]))
 
     return image
+
+
+def negative(source):
+
+    image = Image.open(source)
+    for i in range(0, image.size[0] - 1):
+        for j in range(0, image.size[1] - 1):
+
+            pixelcolor = image.getpixel((i, j))
+
+            red = 255 - pixelcolor[0]
+
+            green = 255 - pixelcolor[1]
+
+            blue = 255 - pixelcolor[2]
+
+            image.putpixel((i, j), (red, green, blue))
+
+    return image

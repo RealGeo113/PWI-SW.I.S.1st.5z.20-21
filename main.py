@@ -1,12 +1,14 @@
-from project import scale, gray, lumi
+import project
 
 
-source = "./2.png"
+source = input("Enter path to image: ")
 
-scaled = scale(source, 2);
-grayed = gray(source);
-lumichange = lumi(source, 200)
+scaled = project.scale(source, 2)
+grayed = project.gray(source)
+luminesence = project.lumi(source, 200)
+negative = project.negative(source)
 
 scaled.show()
 grayed.show()
-lumichange.show()
+luminesence.show()
+negative.show()
