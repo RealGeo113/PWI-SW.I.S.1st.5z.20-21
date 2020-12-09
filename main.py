@@ -19,4 +19,3 @@ source = input("Enter path to image: ")
 
 project.mask(source)
 
-

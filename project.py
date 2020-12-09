@@ -138,24 +138,29 @@ def mask(source):
         cv.imshow('Contours', drawing)
         cv.imshow("Whiteboard", whiteboard)
 
-        return whiteboard
+        image = src
+        masked_image = cv.subtract(whiteboard, image)
+        result = cv.subtract(whiteboard, masked_image)
+        result_cropped = result[y1:y2, x1:x2]
+        cv.imshow("Result", result_cropped)
 
     src = cv.imread(source)
     if src is None:
         print('Could not open or find the image:', source)
         exit(0)
     # Convert image to gray and blur it
-    src = cv.resize(src, (1000, 750))
+    width, height, channel = src.shape
+
+    src = cv.resize(src, (int(height/4),int(width/4)))
     src_gray = cv.cvtColor(src, cv.COLOR_BGR2GRAY)
     src_gray = cv.blur(src_gray, (3, 3))
     source_window = 'Source'
     cv.namedWindow(source_window)
     cv.imshow(source_window, src)
     max_thresh = 255
-    thresh = 100  # initial threshold
-    mask = cv.createTrackbar('Canny thresh:', source_window, thresh, max_thresh, thresh_callback)
+    thresh = 170  # initial threshold
+    cv.createTrackbar('Canny thresh:', source_window, thresh, max_thresh, thresh_callback)
     thresh_callback(thresh)
     cv.waitKey()
-
     return mask
 
