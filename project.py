@@ -101,7 +101,7 @@ def mask(source):
 
         canny_output = cv.Canny(src_gray, threshold, threshold * 2)
 
-        _, contours, _ = cv.findContours(canny_output, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
+        contours, _ = cv.findContours(canny_output, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
 
         contours_poly = [None] * len(contours)
         boundRect = [None] * len(contours)
