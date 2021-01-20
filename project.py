@@ -88,6 +88,7 @@ def gaussian_cv(source):
 
 
 def cv_to_pil(source):
+    source = cv.cvtColor(source, cv.COLOR_BGR2RGB)
     image = Image.fromarray(source)
 
     return image
