@@ -3,6 +3,8 @@ import cv2 as cv
 import numpy as np
 import random as rng
 
+#Trzeba przekształcić każdą z funkcji używających format zdjęć PIL na na format CV
+
 def scale(source, ratio):
     image = Image.open(source)
     width = image.size[0] * ratio
@@ -56,7 +58,7 @@ def negative(source):
     return image
 
 
-def threshold(source, edge_min, edge_max):
+def threshold(source, edge_min = 0, edge_max = 255):
     image = Image.open(source)
     for i in range(0, image.size[0] - 1):
         for j in range(0, image.size[1] - 1):
@@ -74,15 +76,19 @@ def threshold(source, edge_min, edge_max):
 
 
 def threshold_cv(source):
-    blur = cv.GaussianBlur(cv.cvtColor(source, cv.COLOR_BGR2GRAY), (7, 7), 0)
+    if len(source.shape) == 3:
+        source = cv.cvtColor(source, cv.COLOR_BGR2GRAY)
+    blur = cv.GaussianBlur(source, (7, 7), 0)
     image = cv.threshold(blur, 80, 120, cv.THRESH_BINARY + cv.THRESH_OTSU)[1]
 
     return image
 
 
 def gaussian_cv(source):
-    source_gray = cv.cvtColor(source, cv.COLOR_BGR2GRAY)
-    image = cv.adaptiveThreshold(source_gray, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 101, 15)
+    if len(source.shape) == 3:
+        source = cv.cvtColor(source, cv.COLOR_BGR2GRAY)
+
+    image = cv.adaptiveThreshold(source, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 101, 15)
 
     return image
 
@@ -93,74 +99,154 @@ def cv_to_pil(source):
     return image
 
 
-def mask(source):
-    rng.seed(12345)
+# Ukradnięte z https://docs.opencv.org/3.4/db/df6/tutorial_erosion_dilatation.html
 
-    def thresh_callback(val):
-        threshold = val
 
-        canny_output = cv.Canny(src_gray, threshold, threshold * 2)
+def erosion(source,erosion_size):
 
-        contours, _ = cv.findContours(canny_output, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
+    shape = 0  # 0 = square, 1 = cross, 2 = circle
+    element = cv.getStructuringElement(shape, (2 * erosion_size + 1, 2 * erosion_size + 1),
+                                       (erosion_size, erosion_size))
 
-        contours_poly = [None] * len(contours)
-        boundRect = [None] * len(contours)
-        centers = [None] * len(contours)
-        radius = [None] * len(contours)
-        for i, c in enumerate(contours):
+    image = cv.erode(source, element)
+
+    return image
+
+
+def dilatation(source, dilatation_size):
+
+    shape = 0 # 0 = square, 1 = cross, 2 = circle
+    element = cv.getStructuringElement(shape, (2 * dilatation_size + 1, 2 * dilatation_size + 1),
+                                       (dilatation_size, dilatation_size))
+    image = cv.dilate(source, element)
+
+    return image
+
+# Koniec ukradnięcia
+
+
+def edges(source, thresh_val=125):
+    if len(source.shape) == 3:
+        source = cv.cvtColor(source, cv.COLOR_BGR2GRAY)
+    image = cv.Canny(source,thresh_val,thresh_val * 2)
+    return image
+
+
+def find_contours_to_draw(source):
+
+    edged = edges(source)
+    _, contours, _ = cv.findContours(edged,cv.RETR_EXTERNAL,cv.CHAIN_APPROX_NONE)
+
+    return contours
+
+def find_contours(source):
+
+    _, contours, _ = cv.findContours(source, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
+
+    return contours
+
+def draw_contours(source):
+    contours = find_contours_to_draw(source)
+    cv.drawContours(source, contours, -1, (0, 255, 0), 3)
+
+    return source
+
+def draw_rectangles(source, thresh_value = 125):
+
+        image = edges(source, thresh_value)
+        imageContours = find_contours(image)
+
+        contours_poly = [None] * len(imageContours)
+        boundRect = [None] * len(imageContours)
+        centers = [None] * len(imageContours)
+        radius = [None] * len(imageContours)
+
+        for i, c in enumerate(imageContours):
             contours_poly[i] = cv.approxPolyDP(c, 3, True)
             boundRect[i] = cv.boundingRect(contours_poly[i])
             centers[i], radius[i] = cv.minEnclosingCircle(contours_poly[i])
 
-        drawing = np.zeros((canny_output.shape[0], canny_output.shape[1], 3), dtype=np.uint8)
+        drawing = np.zeros((image.shape[0], image.shape[1], 3), dtype=np.uint8)
 
-        x1 = 0
-        y1 = 0
-        x2 = 0
-        y2 = 0
-        area_max = 0;
-        for i in range(len(contours)):
-            color = (rng.randint(0, 256), rng.randint(0, 256), rng.randint(0, 256))
+        for i in range(len(imageContours)):
+            color = (255, 0, 0)
             cv.drawContours(drawing, contours_poly, i, color)
             cv.rectangle(drawing, (int(boundRect[i][0]), int(boundRect[i][1])), \
                          (int(boundRect[i][0] + boundRect[i][2]), int(boundRect[i][1] + boundRect[i][3])), color, 2)
-            # cv.circle(drawing, (int(centers[i][0]), int(centers[i][1])), int(radius[i]), color, 2)
-            area = boundRect[i][2] * boundRect[i][3]
-            if area > area_max:
-                area_max = area
-                x1 = int(boundRect[i][0])
-                y1 = int(boundRect[i][1])
-                x2 = int(boundRect[i][0] + boundRect[i][2])
-                y2 = int(boundRect[i][1] + boundRect[i][3])
 
-        whiteboard = np.zeros((canny_output.shape[0], canny_output.shape[1], 3), dtype=np.uint8)
-        cv.rectangle(whiteboard, (x1, y1), (x2, y2), (255, 255, 255), -1)
-        cv.imshow('Contours', drawing)
-        cv.imshow("Whiteboard", whiteboard)
+        return drawing
 
-        image = src
-        masked_image = cv.subtract(whiteboard, image)
-        result = cv.subtract(whiteboard, masked_image)
-        result_cropped = result[y1:y2, x1:x2]
-        cv.imshow("Result", result_cropped)
 
-    src = cv.imread(source)
-    if src is None:
-        print('Could not open or find the image:', source)
-        exit(0)
-    # Convert image to gray and blur it
-    width, height, channel = src.shape
+def biggest_rect(source, thresh_val=125):
+    image = edges(source, thresh_val)
+    imageContours = find_contours(image)
 
-    src = cv.resize(src, (int(height/4),int(width/4)))
-    src_gray = cv.cvtColor(src, cv.COLOR_BGR2GRAY)
-    src_gray = cv.blur(src_gray, (3, 3))
-    source_window = 'Source'
-    cv.namedWindow(source_window)
-    cv.imshow(source_window, src)
-    max_thresh = 255
-    thresh = 170  # initial threshold
-    cv.createTrackbar('Canny thresh:', source_window, thresh, max_thresh, thresh_callback)
-    thresh_callback(thresh)
-    cv.waitKey()
-    return mask
+    contours_poly = [None] * len(imageContours)
+    boundRect = [None] * len(imageContours)
+
+    for i, c in enumerate(imageContours):
+        contours_poly[i] = cv.approxPolyDP(c, 3, True)
+        boundRect[i] = cv.boundingRect(contours_poly[i])
+
+    area_max = 0
+    rectangle = Rect()
+    for i in range(len(imageContours)):
+        area = boundRect[i][2] * boundRect[i][3]
+        if area > area_max:
+            area_max = area
+            rectangle.x1 = int(boundRect[i][0])
+            rectangle.y1 = int(boundRect[i][1])
+            rectangle.x2 = int(boundRect[i][0] + boundRect[i][2])
+            rectangle.y2 = int(boundRect[i][1] + boundRect[i][3])
+
+    return rectangle
+
+
+def mask(source, rect = False):
+
+    if(rect == False):
+        rect = biggest_rect(source)
+
+    image = np.zeros((source.shape[0], source.shape[1], 3), dtype=np.uint8)
+    cv.rectangle(image, (rect.x1, rect.y1), (rect.x2, rect.y2), (255, 255, 255), -1)
+
+    return image
+
+
+# WORK WORK WORK, 8 IMAGES INSTEAD OF 1
+# WHAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAT
+
+def color_segmentation(source):
+
+    Z = np.float32(source.reshape((-1, 3)))
+    criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 10, 1.0)
+    K = 4
+    _, labels, centers = cv.kmeans(Z, K, None, criteria, 10, cv.KMEANS_RANDOM_CENTERS)
+    labels = labels.reshape((source.shape[:-1]))
+    reduced = np.uint8(centers)[labels]
+
+    result = [np.hstack([source, reduced])]
+    for i, c in enumerate(centers):
+        mask = cv.inRange(labels, i, i)
+        mask = np.dstack([mask] * 3)  # Make it 3 channel
+        ex_img = cv.bitwise_and(source, mask)
+        ex_reduced = cv.bitwise_and(reduced, mask)
+        result.append(np.hstack([ex_img, ex_reduced]))
+
+    image = np.vstack(result)
+    return image
+
+class Rect:
+
+    x1 = 0
+    y1 = 0
+    x2 = 0
+    y2 = 0
+
+    #This is retarded, why I have to assign default vaules?
+    def __init__(self, x1 = 0, y1 = 0, x2 = 0, y2 = 0):
+        self.x1 = x1
+        self.y1 = y1
+        self.x2 = x2
+        self.y2 = y2
 
