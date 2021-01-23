@@ -1,4 +1,5 @@
 from tkinter import *
+from PIL import ImageTk, Image
 
 root = Tk()
 root.title('Skanowanie tablicy suchościeralnej')
@@ -40,9 +41,8 @@ obrotmenu.add_command(label="Obrót o 180 stopni")
 obrotmenu.add_command(label="Obrót o 270 stopni")
 obrazmenu.add_cascade(label="Obrót", menu=obrotmenu)
 
-menubar = Menu(root)
+
 funkcjemenu = Menu(menubar, tearoff=0)
-funkcjemenu.add_command(label="")
 funkcjemenu.add_command(label="Normalizacja histogramu")
 funkcjemenu.add_command(label="Progowanie")
 funkcjemenu.add_command(label="Detekcja krawędzi")
@@ -52,7 +52,7 @@ funkcjemenu.add_command(label="Segmentacja")
 funkcjemenu.add_command(label="Erozja")
 funkcjemenu.add_command(label="Dylatacja")
 funkcjemenu.add_command(label="Klasyfikator cech")
-menubar.add_cascade(label="Plik", menu=funkcjemenu)
+menubar.add_cascade(label="Funkcje", menu=funkcjemenu)
 
 
 root.config(menu=menubar)
