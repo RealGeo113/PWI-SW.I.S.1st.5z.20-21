@@ -174,7 +174,7 @@ def mean_cv(source, blocksize, C):
 
 
 def cv_to_pil(source):
-    source = cv.cvtColor(source, cv.COLOR_BGR2RGB)
+    # source = cv.cvtColor(source, cv.COLOR_BGR2RGB)
     image = Image.fromarray(source)
 
     return image

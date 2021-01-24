@@ -5,7 +5,8 @@ from PIL.ImageFilter import (
 )
 
 def filtry (source, type):
-    img = Image.open(source)
+    # img = Image.open(source)
+    img = source
 
     if type == 1:
         img1 = img.filter(BLUR)
