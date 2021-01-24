@@ -21,6 +21,13 @@ def scale_cv(source, ratio):
 
     return image
 
+
+def scale_cv_px(source, width, height):
+    image = cv.resize(source, (height, width))
+
+    return image
+
+
 def scale(source, ratio):
     # check if pil or cv, apply correct scale function
     return
@@ -73,10 +80,52 @@ def negative(source):
     return image
 
 
+def rotate90(source):
+    image = cv_to_pil(source)
+    imageClone = Image.new("RGB", (image.size[1], image.size[0]))
+    print(image.size)
+    print(imageClone.size)
+    for i in range(0, image.size[0]):
+        for j in range(0, image.size[1]):
+            pixelcolor = image.getpixel((i, j))
+            imageClone.putpixel(((imageClone.size[0] - j - 1), i), pixelcolor)
+
+    imageClone = np.array(imageClone)
+    return imageClone
+
+
+def rotate180(source):
+    image = cv_to_pil(source)
+    imageClone = Image.new("RGB", (image.size[0], image.size[1]))
+    print(image.size)
+    print(imageClone.size)
+    for i in range(0, image.size[0]):
+        for j in range(0, image.size[1]):
+            pixelcolor = image.getpixel((i, j))
+            imageClone.putpixel(((imageClone.size[0] - i - 1), imageClone.size[1] - j - 1), pixelcolor)
+
+    imageClone = np.array(imageClone)
+    return imageClone
+
+
+def rotate270(source):
+    image = cv_to_pil(source)
+    imageClone = Image.new("RGB", (image.size[1], image.size[0]))
+    print(image.size)
+    print(imageClone.size)
+    for i in range(0, image.size[0]):
+        for j in range(0, image.size[1]):
+            pixelcolor = image.getpixel((i, j))
+            imageClone.putpixel((j, imageClone.size[1] - i - 1), pixelcolor)
+
+    imageClone = np.array(imageClone)
+    return imageClone
+
+
 def threshold(source, edge_min=0, edge_max=255):
     image = cv_to_pil(source)
-    for i in range(0, image.size[0] - 1):
-        for j in range(0, image.size[1] - 1):
+    for i in range(0, image.size[0]):
+        for j in range(0, image.size[1]):
             pixelcolor = image.getpixel((i, j))
             avgpixel = sum(pixelcolor) / 3
             if avgpixel < edge_min:
@@ -112,6 +161,18 @@ def gaussian_cv(source, blocksize, C):
     return image
 
 
+def mean_cv(source, blocksize, C):
+    if len(source.shape) == 3:
+        source = cv.cvtColor(source, cv.COLOR_BGR2GRAY)
+
+    if blocksize % 2 == 0:
+        blocksize+=1
+
+    image = cv.adaptiveThreshold(source, 255, cv.ADAPTIVE_THRESH_MEAN_C, cv.THRESH_BINARY, blocksize, C)
+
+    return image
+
+
 def cv_to_pil(source):
     source = cv.cvtColor(source, cv.COLOR_BGR2RGB)
     image = Image.fromarray(source)
@@ -130,6 +191,7 @@ def pil_to_cv(source):
 
 def erosion(source, erosion_size):
     shape = 0  # 0 = square, 1 = cross, 2 = circle
+
     element = cv.getStructuringElement(shape, (2 * erosion_size + 1, 2 * erosion_size + 1),
                                        (erosion_size, erosion_size))
 
