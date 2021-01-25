@@ -52,7 +52,8 @@ def gray_cv(source):
 
 
 def luminesence(source, ratio):
-    image = cv_to_pil(source)
+    # image = cv_to_pil(source)
+    image = source
     newpixel = [1, 2, 3]
     for i in range(0, image.size[0] - 1):
         for j in range(0, image.size[1] - 1):
@@ -67,7 +68,8 @@ def luminesence(source, ratio):
 
 
 def negative(source):
-    image = cv_to_pil(source)
+    # image = cv_to_pil(source)
+    image = source
     for i in range(0, image.size[0] - 1):
         for j in range(0, image.size[1] - 1):
             pixelcolor = image.getpixel((i, j))
@@ -81,10 +83,11 @@ def negative(source):
 
 
 def rotate90(source):
-    image = cv_to_pil(source)
+    # image = cv_to_pil(source)
+    image = source
     imageClone = Image.new("RGB", (image.size[1], image.size[0]))
-    print(image.size)
-    print(imageClone.size)
+    # print(image.size)
+    # print(imageClone.size)
     for i in range(0, image.size[0]):
         for j in range(0, image.size[1]):
             pixelcolor = image.getpixel((i, j))
@@ -95,10 +98,11 @@ def rotate90(source):
 
 
 def rotate180(source):
-    image = cv_to_pil(source)
+    # image = cv_to_pil(source)
+    image = source
     imageClone = Image.new("RGB", (image.size[0], image.size[1]))
-    print(image.size)
-    print(imageClone.size)
+    # print(image.size)
+    # print(imageClone.size)
     for i in range(0, image.size[0]):
         for j in range(0, image.size[1]):
             pixelcolor = image.getpixel((i, j))
@@ -109,10 +113,11 @@ def rotate180(source):
 
 
 def rotate270(source):
-    image = cv_to_pil(source)
+    # image = cv_to_pil(source)
+    image = source
     imageClone = Image.new("RGB", (image.size[1], image.size[0]))
-    print(image.size)
-    print(imageClone.size)
+    # print(image.size)
+    # print(imageClone.size)
     for i in range(0, image.size[0]):
         for j in range(0, image.size[1]):
             pixelcolor = image.getpixel((i, j))
@@ -212,7 +217,8 @@ def dilatation(source, dilatation_size):
 # Koniec ukradnięcia
 
 
-def edges(source, thresh_val=125):
+def edges(source):
+    thresh_val = 125
     if len(source.shape) == 3:
         source = cv.cvtColor(source, cv.COLOR_BGR2GRAY)
     image = cv.Canny(source, thresh_val, thresh_val * 2)
@@ -299,7 +305,8 @@ def mask(source, rect=False):
     return image
 
 
-def color_segmentation(source, k=2):
+def color_segmentation(source):
+    k = 2
     Z = np.float32(source.reshape((-1, 3)))
     criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 10, 1.0)
     ret, label, center = cv.kmeans(Z, k, None, criteria, 10, cv.KMEANS_RANDOM_CENTERS)

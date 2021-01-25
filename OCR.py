@@ -4,7 +4,7 @@ except ImportError:
     import Image
 import pytesseract
 
-def OCR(source, language):
+def OCR(source):
     pytesseract.pytesseract.tesseract_cmd = r'F:\Program Files\Tesseract-OCR\tesseract.exe'
 
-    return (pytesseract.image_to_string(Image.open(source), lang=language))
+    return (pytesseract.image_to_string(source, lang="pol"))
