@@ -1,11 +1,8 @@
 from PIL import Image
 import cv2 as cv
 import numpy as np
-import random as rng
 
 
-
-# Każda operacja na obrazach PIL jest super wolna bo python, więc lepiej ich nie używać.
 def scale_pil(source, ratio):
     image = cv_to_pil(source)
     width = image.size[0] * ratio
@@ -22,15 +19,10 @@ def scale_cv(source, ratio):
     return image
 
 
-def scale_cv_px(source, width, height):
-    image = cv.resize(source, (height, width))
+def scale_cv_px(source, width):
+    image = cv.resize(source, (width,int(width/source.shape[1] * source.shape[0])))
 
     return image
-
-
-def scale(source, ratio):
-    # check if pil or cv, apply correct scale function
-    return
 
 
 def gray_pil(source):
@@ -227,7 +219,7 @@ def find_contours_to_draw(source):
 
 
 def find_contours(source):
-    _, contours, _ = cv.findContours(source, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
+    contours, _ = cv.findContours(source, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
 
     return contours
 
@@ -308,6 +300,21 @@ def color_segmentation(source, k=2):
     res2 = res.reshape((source.shape))
 
     return res2
+
+
+def whiteboard(source):
+
+    area = biggest_rect(source)
+    image = source[area.y1:area.y2, area.x1:area.x2]
+    image = gaussian_cv(image,3,2)
+    return image
+
+
+def transformation(source, pts1, pts2):
+    M = cv.getPerspectiveTransform(pts1,pts2)
+    image = cv.warpPerspective(source,M,(300,300))
+
+    return image
 
 
 class Rect:
