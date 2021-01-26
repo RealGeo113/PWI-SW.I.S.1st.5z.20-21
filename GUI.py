@@ -9,6 +9,7 @@ import filtry
 import cv2 as cv
 import numpy
 import histogram
+import skeletonization
 
 
 def displayer(patch):
@@ -156,6 +157,12 @@ def doDilatation(source):
     source = project.cv_to_pil(source)
     displayer(source)
 
+def doSkeletonization(source):
+    source = project.pil_to_cv(source)
+    source = skeletonization.skeletonize(source)
+    source = project.cv_to_pil(source)
+    displayer(source)
+
 
 root = Tk()
 root.title('Skanowanie tablicy suchościeralnej')
@@ -202,7 +209,7 @@ funkcjemenu = Menu(menubar, tearoff=0)
 funkcjemenu.add_command(label="Normalizacja histogramu", command=lambda: doEqualization(returner))
 funkcjemenu.add_command(label="Progowanie", command=lambda: doThreshold(returner))
 funkcjemenu.add_command(label="Detekcja krawędzi", command=lambda: doEdge(returner))
-funkcjemenu.add_command(label="Szkieletyzacja")
+funkcjemenu.add_command(label="Szkieletyzacja", command=lambda: doSkeletonization(returner))
 funkcjemenu.add_command(label="Detekcja OCR", command=lambda: doOCR(returner))
 funkcjemenu.add_command(label="Segmentacja", command=lambda: doSegmetation(returner))
 funkcjemenu.add_command(label="Erozja", command=lambda: doErosion(returner))
