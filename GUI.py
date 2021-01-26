@@ -176,6 +176,12 @@ def doWhiteboard(source):
     source = project.cv_to_pil(source)
     displayer(source)
 
+def doTransformation(source):
+    source = project.pil_to_cv(source)
+    source = project.transformation(source)
+    source = project.cv_to_pil(source)
+    displayer(source)
+
 
 root = Tk()
 root.title('Skanowanie tablicy suchościeralnej')
@@ -192,6 +198,7 @@ menubar.add_cascade(label="Plik", menu=plikmenu)
 
 filtrmenu = Menu(menubar, tearoff=0)
 filtrmenu.add_command(label="Odcienie szarosci", command=lambda: doGray(returner))
+filtrmenu.add_command(label="Tranformacja do HSV", command=lambda: doTransformation(returner))
 filtrmenu.add_command(label="Negatyw", command=lambda: doNegative(returner))
 filtrmenu.add_separator()
 filtrmenu.add_command(label="BLUR", command=lambda: doBLUR(returner))

@@ -317,10 +317,12 @@ def whiteboard(source):
     return image
 
 
-def transformation(source, pts1, pts2):
-    M = cv.getPerspectiveTransform(pts1,pts2)
-    image = cv.warpPerspective(source,M,(300,300))
+def transformation(source):
+    global wybrany
+    global importuj
+    global obraz
 
+    image = cv.cvtColor(source, cv.COLOR_BGR2HSV)
     return image
 
 
