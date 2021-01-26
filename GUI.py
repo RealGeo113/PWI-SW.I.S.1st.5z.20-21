@@ -1,4 +1,3 @@
-import tkinter
 from tkinter import *
 from tkinter import simpledialog, messagebox
 from tkinter.filedialog import askopenfilename
@@ -6,8 +5,6 @@ from PIL import ImageTk, Image
 import project
 import OCR
 import filtry
-import cv2 as cv
-import numpy
 import histogram
 import skeletonization
 
@@ -15,6 +12,8 @@ import skeletonization
 def displayer(patch):
     global sourceimage
     global wyswietlacz
+    global returner
+    returner = patch
     sizer = patch.size
     patch.thumbnail((1280, 720), Image.ANTIALIAS)
     sourceimage = ImageTk.PhotoImage(patch)
@@ -27,8 +26,16 @@ def displayer(patch):
 
 def openPhoto():
     global returner
+    global orginalImage
     sciezka = askopenfilename(filetypes=[("Pliki obrazów", ".png .jpg .jpe .jpeg .bmp")])
     returner = Image.open(sciezka)
+    orginalImage = returner
+    displayer(returner)
+
+def doReset():
+    global returner
+    global orginalImage
+    returner = orginalImage
     displayer(returner)
 
 
@@ -82,14 +89,14 @@ def doSHARPEN(source):
 
 def doScale(source):
     source = project.pil_to_cv(source)
-    user_inp = simpledialog.askfloat(title="Test", prompt="Podaj współczynnik skalowania (np. 1.1=110%)")
+    user_inp = simpledialog.askfloat(title="Test", prompt="Podaj procent skalowania (np. 110=110%)")
     user_inp = float(user_inp)
     source = project.scale_cv(source, user_inp)
     source = project.cv_to_pil(source)
     displayer(source)
 
 def doLuminescence(source):
-    user_inp = simpledialog.askfloat(title="Test", prompt="Podaj współczynnik jasności (np. 1.1=110%)")
+    user_inp = simpledialog.askfloat(title="Test", prompt="Podaj procent jasności (np. 110=110%)")
     user_inp = float(user_inp)
     source = project.luminesence(source, user_inp)
     source = project.cv_to_pil(source)
@@ -147,19 +154,25 @@ def doSegmetation(source):
 
 def doErosion(source):
     source = project.pil_to_cv(source)
-    source = project.erosion(source)
+    source = project.erosion(source, 1)
     source = project.cv_to_pil(source)
     displayer(source)
 
 def doDilatation(source):
     source = project.pil_to_cv(source)
-    source = project.dilatation(source)
+    source = project.dilatation(source, 1)
     source = project.cv_to_pil(source)
     displayer(source)
 
 def doSkeletonization(source):
     source = project.pil_to_cv(source)
     source = skeletonization.skeletonize(source)
+    source = project.cv_to_pil(source)
+    displayer(source)
+
+def doWhiteboard(source):
+    source = project.pil_to_cv(source)
+    source = project.whiteboard(source)
     source = project.cv_to_pil(source)
     displayer(source)
 
@@ -172,7 +185,7 @@ root.geometry("1296x750")
 menubar = Menu(root)
 plikmenu = Menu(menubar, tearoff=0)
 plikmenu.add_command(label="Otwórz obraz", command= lambda: openPhoto())
-plikmenu.add_command(label="Zapisz obraz")
+plikmenu.add_command(label="Reset", command=lambda: doReset())
 plikmenu.add_separator()
 plikmenu.add_command(label="Wyjdź", command=root.quit)
 menubar.add_cascade(label="Plik", menu=plikmenu)
@@ -214,7 +227,7 @@ funkcjemenu.add_command(label="Detekcja OCR", command=lambda: doOCR(returner))
 funkcjemenu.add_command(label="Segmentacja", command=lambda: doSegmetation(returner))
 funkcjemenu.add_command(label="Erozja", command=lambda: doErosion(returner))
 funkcjemenu.add_command(label="Dylatacja", command=lambda: doDilatation(returner))
-funkcjemenu.add_command(label="Klasyfikator cech")
+funkcjemenu.add_command(label="Wykrywanie tablicy", command=lambda: doWhiteboard(returner))
 menubar.add_cascade(label="Funkcje", menu=funkcjemenu)
 
 

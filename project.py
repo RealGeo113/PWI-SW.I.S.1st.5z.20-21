@@ -14,6 +14,7 @@ def scale_pil(source, ratio):
 
 
 def scale_cv(source, ratio):
+    ratio = ratio/100
     image = cv.resize(source, (int(source.shape[1] * ratio),int(source.shape[0] * ratio)))
 
     return image
@@ -209,8 +210,7 @@ def dilatation(source, dilatation_size):
 # Koniec ukradnięcia
 
 
-def edges(source):
-    thresh_val = 125
+def edges(source, thresh_val = 125):
     if len(source.shape) == 3:
         source = cv.cvtColor(source, cv.COLOR_BGR2GRAY)
     image = cv.Canny(source, thresh_val, thresh_val * 2)
@@ -313,7 +313,7 @@ def whiteboard(source):
 
     area = biggest_rect(source)
     image = source[area.y1:area.y2, area.x1:area.x2]
-    image = gaussian_cv(image,3,2)
+    # image = gaussian_cv(image,3,2)
     return image
 
 
