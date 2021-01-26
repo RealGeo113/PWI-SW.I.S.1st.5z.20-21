@@ -318,9 +318,6 @@ def whiteboard(source):
 
 
 def transformation(source):
-    global wybrany
-    global importuj
-    global obraz
 
     image = cv.cvtColor(source, cv.COLOR_BGR2HSV)
     return image
