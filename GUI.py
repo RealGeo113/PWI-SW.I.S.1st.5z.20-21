@@ -89,14 +89,14 @@ def doSHARPEN(source):
 
 def doScale(source):
     source = project.pil_to_cv(source)
-    user_inp = simpledialog.askfloat(title="Test", prompt="Podaj procent skalowania (np. 110=110%)")
+    user_inp = simpledialog.askfloat(title="Skanowanie tablicy suchościeralnej", prompt="Podaj procent skalowania (np. 110=110%)")
     user_inp = float(user_inp)
     source = project.scale_cv(source, user_inp)
     source = project.cv_to_pil(source)
     displayer(source)
 
 def doLuminescence(source):
-    user_inp = simpledialog.askfloat(title="Test", prompt="Podaj procent jasności (np. 110=110%)")
+    user_inp = simpledialog.askfloat(title="Skanowanie tablicy suchościeralnej", prompt="Podaj procent jasności (np. 110=110%)")
     user_inp = float(user_inp)
     source = project.luminesence(source, user_inp)
     source = project.cv_to_pil(source)
